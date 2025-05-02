@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<!--
+    Copyright © 2025 Stuart Elrick. All rights reserved. This HTML document contains a lease payment calculator that allows users to input vehicle price, down payment, lease term, interest rate, and residual value.
+    It calculates the monthly payment, total lease cost, and due at signing amount.
+    The calculator is styled with CSS and includes JavaScript for functionality. -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lease Payment Calculator</title>
+</head>
+<body>
+    <!-- Lease Calculator Container -->
+    <div class="lease-calculator">
+        <h2>Lease Payment Calculator</h2>
+        <div class="calculator-form">
+            <div class="form-group">
+                <label for="vehiclePrice">Vehicle Price ($):</label>
+                <input type="number" id="vehiclePrice" min="0" step="100" value="30000">
+            </div>
+            
+            <div class="form-group">
+                <label for="downPayment">Down Payment ($):</label>
+                <input type="number" id="downPayment" min="0" step="100" value="3000">
+            </div>
+            
+            <div class="form-group">
+                <label for="leaseTerm">Lease Term (months):</label>
+                <select id="leaseTerm">
+                    <option value="24">24 months</option>
+                    <option value="36" selected>36 months</option>
+                    <option value="48">48 months</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="interestRate">Annual Interest Rate (%):</label>
+                <input type="number" id="interestRate" min="0" max="20" step="0.1" value="5.9">
+            </div>
+            
+            <div class="form-group">
+                <label for="residualValue">Residual Value (%):</label>
+                <input type="number" id="residualValue" min="0" max="100" step="1" value="55">
+            </div>
+            
+            <button onclick="calculateLease()" class="calculate-btn">Calculate</button>
+            <button onclick="resetForm()" class="reset-btn">Reset</button>
+        </div>
+        
+        <div class="calculator-results">
+            <h3>Lease Payment Details</h3>
+            <div class="result-item">
+                <span>Monthly Payment:</span>
+                <span id="monthlyPayment">$0</span>
+            </div>
+            <div class="result-item">
+                <span>Total Lease Cost:</span>
+                <span id="totalLeaseCost">$0</span>
+            </div>
+            <div class="result-item">
+                <span>Due at Signing:</span>
+                <span id="dueAtSigning">$0</span>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    .lease-calculator {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        font-family: Arial, sans-serif;
+    }
+
+    .lease-calculator h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .calculator-form {
+        display: grid;
+        gap: 15px;
+    }
+
+    .form-group {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        color: #555;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    .calculate-btn,
+    .reset-btn {
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .calculate-btn {
+        background-color: #4CAF50;
+        color: white;
+        margin-top: 10px;
+    }
+
+    .reset-btn {
+        background-color: #f44336;
+        color: white;
+    }
+
+    .calculator-results {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+    }
+
+    .result-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .result-item:last-child {
+        border-bottom: none;
+    }
+
+    @media (max-width: 480px) {
+        .lease-calculator {
+            margin: 10px;
+            padding: 15px;
+        }
+    }
+    </style>
+
+    <script>
+    function calculateLease() {
+        // Get input values
+        const vehiclePrice = parseFloat(document.getElementById('vehiclePrice').value);
+        const downPayment = parseFloat(document.getElementById('downPayment').value);
+        const leaseTerm = parseInt(document.getElementById('leaseTerm').value);
+        const annualInterestRate = parseFloat(document.getElementById('interestRate').value);
+        const residualPercentage = parseFloat(document.getElementById('residualValue').value);
+
+        // Calculate monthly interest rate
+        const monthlyInterestRate = (annualInterestRate / 100) / 12;
+
+        // Calculate residual value
+        const residualValue = vehiclePrice * (residualPercentage / 100);
+
+        // Calculate depreciation amount
+        const depreciationAmount = vehiclePrice - residualValue;
+
+        // Calculate monthly depreciation
+        const monthlyDepreciation = depreciationAmount / leaseTerm;
+
+        // Calculate monthly finance charge
+        const averageFinanceAmount = ((vehiclePrice - downPayment) + residualValue) / 2;
+        const monthlyFinanceCharge = averageFinanceAmount * monthlyInterestRate;
+
+        // Calculate total monthly payment
+        const monthlyPayment = monthlyDepreciation + monthlyFinanceCharge;
+
+        // Calculate total lease cost
+        const totalLeaseCost = (monthlyPayment * leaseTerm) + downPayment;
+
+        // Calculate due at signing (down payment + first month's payment)
+        const dueAtSigning = downPayment + monthlyPayment;
+
+        // Display results
+        document.getElementById('monthlyPayment').textContent = formatCurrency(monthlyPayment);
+        document.getElementById('totalLeaseCost').textContent = formatCurrency(totalLeaseCost);
+        document.getElementById('dueAtSigning').textContent = formatCurrency(dueAtSigning);
+    }
+
+    function resetForm() {
+        document.getElementById('vehiclePrice').value = '30000';
+        document.getElementById('downPayment').value = '3000';
+        document.getElementById('leaseTerm').value = '36';
+        document.getElementById('interestRate').value = '5.9';
+        document.getElementById('residualValue').value = '55';
+        
+        document.getElementById('monthlyPayment').textContent = '$0';
+        document.getElementById('totalLeaseCost').textContent = '$0';
+        document.getElementById('dueAtSigning').textContent = '$0';
+    }
+
+    function formatCurrency(number) {
+        return '$' + number.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    }
+
+    // Calculate initial values on page load
+    document.addEventListener('DOMContentLoaded', calculateLease);
+    </script>
+</body>
+</html>
+
